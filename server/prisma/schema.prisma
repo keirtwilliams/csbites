@@ -1,0 +1,78 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+enum Role {
+  CUSTOMER
+  RIDER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  ASSIGNED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  orders    Order[]
+  rider     Rider?
+}
+
+model Rider {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  latitude  Float
+  longitude Float
+  isActive  Boolean  @default(true)
+
+  user      User     @relation(fields: [userId], references: [id])
+  orders    Order[]
+}
+
+model FoodItem {
+  id        String   @id @default(uuid())
+  name      String
+  price     Float
+  isActive  Boolean  @default(true)
+
+  orderItems OrderItem[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  customerId  String
+  riderId     String?
+  pickup      String
+  dropoff     String
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+
+  customer    User        @relation(fields: [customerId], references: [id])
+  rider       Rider?      @relation(fields: [riderId], references: [id])
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId  String
+  foodId   String
+  quantity Int
+
+  order    Order    @relation(fields: [orderId], references: [id])
+  food     FoodItem @relation(fields: [foodId], references: [id])
+}
