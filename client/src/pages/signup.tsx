@@ -6,15 +6,25 @@ import {
   Button,
   Title,
   Text,
-  Select,
   Stack,
   Divider,
+  Checkbox,
+  NumberInput,
 } from "@mantine/core";
 
 export default function Signup({ onSignup, onSwitch }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<string | null>("CUSTOMER");
+
+  // 🔒 Role is FIXED
+  const role = "CUSTOMER";
+
+  // 🚴 Rider option
+  const [isRider, setIsRider] = useState(false);
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+const [longitude, setLongitude] = useState<number | undefined>(undefined);
+
+
   const [loading, setLoading] = useState(false);
 
   async function handleSignup() {
@@ -26,7 +36,13 @@ export default function Signup({ onSignup, onSwitch }: any) {
       body: JSON.stringify({
         email,
         password,
-        role,
+        role, // ALWAYS CUSTOMER
+        rider: isRider
+          ? {
+              latitude,
+              longitude,
+            }
+          : null,
       }),
     });
 
@@ -40,13 +56,11 @@ export default function Signup({ onSignup, onSwitch }: any) {
     onSignup(await res.json());
   }
 
+
+
+
   return (
-    <Card
-      withBorder
-      shadow="lg"
-      radius="md"
-      p="xl"
-    >
+    <Card withBorder shadow="lg" radius="md" p="xl">
       <Stack gap="xs">
         <Title order={2}>Create account</Title>
         <Text c="dimmed" size="sm">
@@ -75,17 +89,34 @@ export default function Signup({ onSignup, onSwitch }: any) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <Select
-          label="Account type"
-          size="md"
-          required
-          data={[
-            { value: "CUSTOMER", label: "Customer" },
-            { value: "ADMIN", label: "Admin" },
-          ]}
-          value={role}
-          onChange={setRole}
+        {/* 🚴 Rider Toggle */}
+        <Checkbox
+          label="Register as Rider"
+          checked={isRider}
+          onChange={(e) => setIsRider(e.currentTarget.checked)}
+          mt="sm"
         />
+
+    {isRider && (
+  <>
+    <NumberInput
+      label="Latitude"
+      placeholder="e.g. 10.7202"
+      value={latitude}
+      onChange={(val) => setLatitude(val as number)}
+      required
+    />
+
+    <NumberInput
+      label="Longitude"
+      placeholder="e.g. 122.5621"
+      value={longitude}
+      onChange={(val) => setLongitude(val as number)}
+      required
+    />
+  </>
+)}
+    
 
         <Button
           size="md"

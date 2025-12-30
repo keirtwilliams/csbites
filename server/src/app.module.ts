@@ -1,14 +1,17 @@
 import { Module } from "@nestjs/common";
-import { OrdersModule } from "./orders/orders.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
 import { FoodModule } from "./food/food.module";
+import { OrdersModule } from "./orders/orders.module";
+import { RiderModule } from "./rider/rider.module";
+
 @Module({
   imports: [
     PrismaModule,
-    OrdersModule,
     AuthModule,
-     FoodModule, 
+    FoodModule,
+    OrdersModule, // 🔴 THIS WAS MISSING
+    RiderModule,
   ],
 })
 export class AppModule {}

@@ -1,21 +1,17 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "type": "commonjs",
+
   "scripts": {
     "start": "node dist/main.js",
     "start:dev": "ts-node src/main.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "@types/node": "^25.0.3",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
+
   "dependencies": {
     "@nestjs/common": "^11.1.10",
     "@nestjs/core": "^11.1.10",
@@ -24,5 +20,11 @@
     "prisma": "^6.19.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
+  },
+
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

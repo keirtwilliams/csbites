@@ -9,6 +9,7 @@ import {
   Text,
   Stack,
   Divider,
+  Grid,
 } from "@mantine/core";
 import { fetchFood } from "../api/food";
 
@@ -34,7 +35,15 @@ export default function CreateOrder({ user }: any) {
         )
       );
     } else {
-      setItems([...items, { foodId: foodItem.id, name: foodItem.name, price: foodItem.price, quantity: 1 }]);
+      setItems([
+        ...items,
+        {
+          foodId: foodItem.id,
+          name: foodItem.name,
+          price: foodItem.price,
+          quantity: 1,
+        },
+      ]);
     }
   }
 
@@ -53,7 +62,10 @@ export default function CreateOrder({ user }: any) {
         customerId: user.id,
         pickup,
         dropoff,
-        items: items.map(({ foodId, quantity }) => ({ foodId, quantity })),
+        items: items.map(({ foodId, quantity }) => ({
+          foodId,
+          quantity,
+        })),
       }),
     });
 
@@ -67,75 +79,97 @@ export default function CreateOrder({ user }: any) {
         Order Food
       </Title>
 
-      <Group grow mb="lg">
-        <TextInput
-          label="Pickup location"
-          value={pickup}
-          onChange={(e) => setPickup(e.target.value)}
-        />
-        <TextInput
-          label="Dropoff location"
-          value={dropoff}
-          onChange={(e) => setDropoff(e.target.value)}
-        />
-      </Group>
+      {/* Pickup / Dropoff */}
+      <Grid mb="lg">
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <TextInput
+            label="Pickup location"
+            value={pickup}
+            onChange={(e) => setPickup(e.target.value)}
+          />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <TextInput
+            label="Dropoff location"
+            value={dropoff}
+            onChange={(e) => setDropoff(e.target.value)}
+          />
+        </Grid.Col>
+      </Grid>
 
-      <Group align="flex-start" spacing="xl">
+      {/* Main Content */}
+      <Grid align="flex-start">
         {/* FOOD LIST */}
-        <SimpleGrid cols={3} style={{ flex: 2 }}>
-          {food.map((f) => (
-            <Card key={f.id} shadow="sm" radius="md">
-              <Text fw={600}>{f.name}</Text>
-              <Text size="sm" c="dimmed">
-                ₱{f.price}
-              </Text>
-              <Button mt="sm" fullWidth onClick={() => addItem(f)}>
-                Add
-              </Button>
-            </Card>
-          ))}
-        </SimpleGrid>
+        <Grid.Col span={{ base: 12, md: 8 }}>
+          <SimpleGrid
+            cols={{ base: 1, sm: 2, md: 3 }}
+            spacing="md"
+          >
+            {food.map((f) => (
+              <Card key={f.id} shadow="sm" radius="md">
+                <Text fw={600}>{f.name}</Text>
+                <Text size="sm" c="dimmed">
+                  ₱{f.price}
+                </Text>
+                <Button
+                  mt="sm"
+                  fullWidth
+                  onClick={() => addItem(f)}
+                >
+                  Add
+                </Button>
+              </Card>
+            ))}
+          </SimpleGrid>
+        </Grid.Col>
 
         {/* ORDER SUMMARY */}
-        <Card shadow="sm" radius="md" style={{ width: 300 }}>
-          <Title order={4}>Your Order</Title>
+        <Grid.Col span={{ base: 12, md: 4 }}>
+          <Card shadow="sm" radius="md">
+            <Title order={4}>Your Order</Title>
 
-          <Divider my="sm" />
+            <Divider my="sm" />
 
-          {items.length === 0 ? (
-            <Text c="dimmed">No items added</Text>
-          ) : (
-            <Stack spacing="xs">
-              {items.map((item) => (
-                <Group key={item.foodId} position="apart">
-                  <Text size="sm">
-                    {item.name} × {item.quantity}
-                  </Text>
-                  <Text size="sm">
-                    ₱{item.price * item.quantity}
-                  </Text>
-                </Group>
-              ))}
-            </Stack>
-          )}
+            {items.length === 0 ? (
+              <Text c="dimmed">No items added</Text>
+            ) : (
+              <Stack gap="xs">
+                {items.map((item) => (
+                  <Group
+                    key={item.foodId}
+                    justify="space-between"
+                  >
+                    <Text size="sm">
+                      {item.name} × {item.quantity}
+                    </Text>
+                    <Text size="sm">
+                      ₱{item.price * item.quantity}
+                    </Text>
+                  </Group>
+                ))}
+              </Stack>
+            )}
 
-          <Divider my="sm" />
+            <Divider my="sm" />
 
-          <Group position="apart">
-            <Text fw={600}>Total</Text>
-            <Text fw={600}>₱{calculateTotal()}</Text>
-          </Group>
+            <Group justify="space-between">
+              <Text fw={600}>Total</Text>
+              <Text fw={600}>₱{calculateTotal()}</Text>
+            </Group>
 
-          <Button
-            fullWidth
-            mt="md"
-            disabled={!pickup || !dropoff || items.length === 0}
-            onClick={submitOrder}
-          >
-            Place Order
-          </Button>
-        </Card>
-      </Group>
+            <Button
+              fullWidth
+              mt="md"
+              disabled={
+                !pickup || !dropoff || items.length === 0
+              }
+              onClick={submitOrder}
+            >
+              Place Order
+            </Button>
+          </Card>
+        </Grid.Col>
+      </Grid>
     </>
   );
 }

@@ -12,10 +12,7 @@ export class AuthController {
 
   @Post("register")
   register(@Body() body: any) {
-    return this.authService.register(
-      body.email,
-      body.password,
-      body.role
-    );
+    // ✅ PASS THE FULL BODY
+    return this.authService.register(body);
   }
 }

@@ -1,25 +1,28 @@
-import { Controller, Post, Get, Patch, Param, Body } from "@nestjs/common";
+import { Controller, Get, Post, Patch, Param, Body } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
 
 @Controller("orders")
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private orders: OrdersService) {}
 
-  @Post()
-  createOrder(@Body() body: any) {
-    return this.ordersService.createOrder(body);
-  }
-
+  // GET /orders
   @Get()
-  getOrders() {
-    return this.ordersService.getOrders();
+  getAll() {
+    return this.orders.getOrders();
   }
 
+  // POST /orders
+  @Post()
+  create(@Body() body: any) {
+    return this.orders.createOrder(body);
+  }
+
+  // PATCH /orders/:id/assign
   @Patch(":id/assign")
-  assignRider(
+  assign(
     @Param("id") orderId: string,
     @Body("riderId") riderId: string
   ) {
-    return this.ordersService.assignRider(orderId, riderId);
+    return this.orders.assignRider(orderId, riderId);
   }
 }
