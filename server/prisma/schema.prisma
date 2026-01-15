@@ -1,0 +1,108 @@
+// server/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ✅ CHANGED: Pointing to Neon (PostgreSQL)
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  RIDER
+  ADMIN
+  STORE_OWNER
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING        
+  READY_FOR_PICKUP 
+  ASSIGNED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  // Relations
+  orders    Order[]  // As a customer
+  rider     Rider?   // If role is RIDER
+  store     Store?   // If role is STORE_OWNER
+}
+
+model Store {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  imageUrl  String?  
+  isOpen    Boolean  @default(true) 
+
+  // Relation to Owner
+  ownerId   String   @unique 
+  owner     User     @relation(fields: [ownerId], references: [id])
+
+  // Relations to Data
+  menu      FoodItem[] 
+  orders    Order[]    
+}
+
+model Rider {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  latitude  Float
+  longitude Float
+  isActive  Boolean  @default(true)
+
+  user      User     @relation(fields: [userId], references: [id])
+  orders    Order[]
+}
+
+model FoodItem {
+  id        String   @id @default(uuid())
+  name      String
+  price     Float
+  isActive  Boolean  @default(true)
+  imageUrl  String?  
+
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+
+  orderItems OrderItem[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  customerId  String
+  riderId     String?
+   
+  storeId     String      
+  store       Store       @relation(fields: [storeId], references: [id])
+
+  pickup      String
+  dropoff     String
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+
+  customer    User        @relation(fields: [customerId], references: [id])
+  rider       Rider?      @relation(fields: [riderId], references: [id])
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  foodId    String
+  quantity  Int
+
+  order     Order    @relation(fields: [orderId], references: [id])
+  food      FoodItem @relation(fields: [foodId], references: [id])
+}
