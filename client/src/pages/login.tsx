@@ -10,6 +10,9 @@ import {
   Divider,
 } from "@mantine/core";
 
+// ✅ FIX: Define the base URL (Vercel or Localhost)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export default function Login({ onLogin, onSwitch }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +21,8 @@ export default function Login({ onLogin, onSwitch }: any) {
   async function handleLogin() {
     setLoading(true);
 
-    const res = await fetch("http://localhost:3000/auth/login", {
+    // ✅ FIX: Use the variable with backticks `
+    const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),

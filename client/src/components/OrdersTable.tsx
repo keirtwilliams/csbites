@@ -13,6 +13,9 @@ import {
 } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 
+// ✅ FIX: Define the base URL (Vercel or Localhost)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export default function OrdersTable() {
   // 📊 State Data
   const [orders, setOrders] = useState<any[]>([]);
@@ -26,9 +29,10 @@ export default function OrdersTable() {
   async function fetchData() {
     // Note: We don't set loading=true here to avoid flickering every 3 seconds
     try {
+      // ✅ FIX: Use the variable
       const [ordersRes, ridersRes] = await Promise.all([
-        fetch("http://localhost:3000/orders"),
-        fetch("http://localhost:3000/orders/riders")
+        fetch(`${API_URL}/orders`),
+        fetch(`${API_URL}/orders/riders`)
       ]);
 
       if (ordersRes.ok) setOrders(await ordersRes.json());
@@ -61,7 +65,8 @@ export default function OrdersTable() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3000/orders/${orderId}/assign`, {
+      // ✅ FIX: Use the variable
+      const res = await fetch(`${API_URL}/orders/${orderId}/assign`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ riderId }),

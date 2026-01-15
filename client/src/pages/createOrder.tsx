@@ -17,6 +17,9 @@ import {
 import { IconArrowLeft, IconBuildingStore, IconMapPin } from "@tabler/icons-react";
 import { fetchAllStores } from "../api/store";
 
+// ✅ FIX: Define the base URL (Vercel or Localhost)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export default function CreateOrder({ user }: any) {
   // 🏪 STATE: Stores & Navigation
   const [stores, setStores] = useState<any[]>([]);
@@ -49,7 +52,8 @@ export default function CreateOrder({ user }: any) {
   async function submitOrder() {
     if (!selectedStore) return;
 
-    await fetch("http://localhost:3000/orders", {
+    // ✅ FIX: Use the variable with backticks `
+    await fetch(`${API_URL}/orders`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

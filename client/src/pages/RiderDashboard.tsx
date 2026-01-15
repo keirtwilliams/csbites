@@ -22,6 +22,9 @@ import {
   IconBuildingStore 
 } from "@tabler/icons-react";
 
+// ✅ FIX: Define the base URL (Vercel or Localhost)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const DELIVERY_FEE = 40;
 
 export default function RiderDashboard({ user }: any) {
@@ -33,7 +36,8 @@ export default function RiderDashboard({ user }: any) {
     if (!user?.riderId) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/riders/${user.riderId}/orders`);
+      // ✅ FIX: Use the variable
+      const res = await fetch(`${API_URL}/riders/${user.riderId}/orders`);
       if (res.ok) {
         const data = await res.json();
         setOrders(data);
@@ -61,7 +65,8 @@ export default function RiderDashboard({ user }: any) {
     
     setLoading(true);
     try {
-      await fetch(`http://localhost:3000/riders/complete/${orderId}`, { 
+      // ✅ FIX: Use the variable
+      await fetch(`${API_URL}/riders/complete/${orderId}`, { 
         method: "POST" 
       });
       await loadOrders(); // Refresh immediately after action
@@ -128,11 +133,11 @@ export default function RiderDashboard({ user }: any) {
                   </Group>
                 </Grid.Col>
                 <Grid.Col span={6}>
-                   <Text size="xs" c="dimmed" tt="uppercase" fw={700}>Dropoff (Customer)</Text>
-                   <Group gap={5} align="flex-start">
-                    <IconMapPin size={16} style={{ marginTop: 3 }} color="orange" />
-                    <Text size="sm" fw={500}>{order.dropoff}</Text>
-                   </Group>
+                    <Text size="xs" c="dimmed" tt="uppercase" fw={700}>Dropoff (Customer)</Text>
+                    <Group gap={5} align="flex-start">
+                     <IconMapPin size={16} style={{ marginTop: 3 }} color="orange" />
+                     <Text size="sm" fw={500}>{order.dropoff}</Text>
+                    </Group>
                 </Grid.Col>
               </Grid>
 
@@ -154,8 +159,8 @@ export default function RiderDashboard({ user }: any) {
               {/* FOOTER ACTION */}
               <Group justify="space-between" align="center">
                 <div>
-                   <Text size="xs" c="dimmed">Collect from Customer:</Text>
-                   <Text fw={700} size="xl" c="orange">₱{total.toFixed(2)}</Text>
+                    <Text size="xs" c="dimmed">Collect from Customer:</Text>
+                    <Text fw={700} size="xl" c="orange">₱{total.toFixed(2)}</Text>
                 </div>
 
                 {!isCompleted && (
