@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { 
   Container, Paper, Title, Text, Button, Group, Badge, Grid, 
-  Card, TextInput, NumberInput, Modal, LoadingOverlay, ActionIcon, Stack 
+  Card, TextInput, NumberInput, Modal, LoadingOverlay, ActionIcon, Stack,
+  Image // 👈 Added Image import
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconPlus, IconTrash, IconBuildingStore } from '@tabler/icons-react';
+import { IconPlus, IconTrash } from '@tabler/icons-react';
 // 👇 Import the API functions we created
 import { fetchStoreByOwner, createStore, addFoodItem } from '../api/store'; 
 
@@ -103,7 +104,15 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
       <Container size="xs" mt={80}>
         <Paper shadow="md" p="xl" radius="md" withBorder>
           <Stack align="center" mb="lg">
-            <IconBuildingStore size={50} color="#228be6" />
+            {/* 🍔 LOGO HERE for Setup Screen */}
+            <Image 
+                src="/csbites.png" 
+                h={80} 
+                w="auto" 
+                fit="contain" 
+                alt="CS Bites Logo"
+                mb="xs" 
+            />
             <Title order={2}>Setup Your Store</Title>
             <Text c="dimmed" ta="center">
               You are registered as a Store Owner. Create your profile to start selling.
@@ -138,10 +147,21 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
   return (
     <Container size="lg" py="xl">
       <Group justify="space-between" mb="xl">
-        <div>
-          <Title order={1}>{store.name}</Title>
-          <Text c="dimmed" size="sm">{store.address}</Text>
-        </div>
+        <Group>
+            {/* 🍔 LOGO HERE for Main Dashboard */}
+             <Image 
+                src="/csbites.png" 
+                h={50} 
+                w="auto" 
+                fit="contain" 
+                alt="CS Bites Logo" 
+             />
+            <div>
+              <Title order={1}>{store.name}</Title>
+              <Text c="dimmed" size="sm">{store.address}</Text>
+            </div>
+        </Group>
+        
         <Badge size="lg" color={store.isOpen ? 'green' : 'red'} variant="light">
           {store.isOpen ? 'OPEN FOR ORDERS' : 'CLOSED'}
         </Badge>
@@ -151,13 +171,13 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
         {/* Stats Column */}
         <Grid.Col span={{ base: 12, md: 4 }}>
           <Stack>
-            {/* ✅ FIX: Changed 'padding' to 'p' (Responsive padding) */}
+            {/* ✅ FIX: Responsive padding */}
             <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder>
               <Text size="xs" tt="uppercase" fw={700} c="dimmed">Active Orders</Text>
               <Title order={2} mt="xs">0</Title> 
             </Card>
             
-            {/* ✅ FIX: Changed 'padding' to 'p' */}
+            {/* ✅ FIX: Responsive padding */}
             <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder>
               <Text size="xs" tt="uppercase" fw={700} c="dimmed">Total Revenue</Text>
               <Title order={2} mt="xs">₱ 0.00</Title> 
@@ -167,7 +187,7 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
 
         {/* Menu Column */}
         <Grid.Col span={{ base: 12, md: 8 }}>
-          {/* ✅ FIX: Changed 'padding' to 'p' */}
+          {/* ✅ FIX: Responsive padding */}
           <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder h="100%">
             <Group justify="space-between" mb="md">
               <Title order={3}>Menu Items</Title>

@@ -10,7 +10,7 @@ import {
   LoadingOverlay,
   ActionIcon,
   Text,
- 
+  Image // 👈 Added Image import
 } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 
@@ -88,21 +88,29 @@ export default function OrdersTable() {
   }));
 
   return (
-    // ✅ RESPONSIVE UPDATE: Dynamic padding (small on mobile, large on desktop)
+    // ✅ RESPONSIVE UPDATE: Dynamic padding
     <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder mt="lg">
       <LoadingOverlay visible={loading} />
       
       <Group justify="space-between" mb="md">
-        <Title order={3} size="h4">Admin Dispatch Board</Title>
+        {/* 🍔 LOGO + TITLE GROUP */}
+        <Group gap="xs">
+          <Image 
+            src="/csbites.png" 
+            h={35} // Smaller height for the table header
+            w="auto" 
+            fit="contain" 
+            alt="CS Bites Logo" 
+          />
+          <Title order={3} size="h4">Admin Dispatch Board</Title>
+        </Group>
+
         <ActionIcon variant="light" size="lg" onClick={() => fetchData()}>
           <IconRefresh size={18} />
         </ActionIcon>
       </Group>
 
-      {/* ✅ RESPONSIVE UPDATE: Table.ScrollContainer 
-         This forces a horizontal scrollbar if the screen is smaller than 800px.
-         This prevents the "Assign" button from getting squished.
-      */}
+      {/* ✅ RESPONSIVE UPDATE: ScrollContainer */}
       <Table.ScrollContainer minWidth={800}>
         <Table striped highlightOnHover verticalSpacing="sm">
           <Table.Thead>
@@ -145,7 +153,7 @@ export default function OrdersTable() {
                 </Table.Td>
                 <Table.Td>
                   {order.status === "PENDING" ? (
-                    <Group gap={5} wrap="nowrap"> {/* wrap="nowrap" keeps button next to select */}
+                    <Group gap={5} wrap="nowrap">
                       <Select
                         placeholder="Pick Rider"
                         data={riderOptions}

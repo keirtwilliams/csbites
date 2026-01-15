@@ -12,7 +12,8 @@ import {
   Grid,
   Badge,
   ActionIcon,
-  Container
+  Container,
+  Image // 👈 Added Image import
 } from "@mantine/core";
 import { IconArrowLeft, IconBuildingStore, IconMapPin } from "@tabler/icons-react";
 import { fetchAllStores } from "../api/store";
@@ -74,10 +75,21 @@ export default function CreateOrder({ user }: any) {
   if (!selectedStore) {
     return (
       <Container>
-        <Title order={2} mb="lg">Choose a Store</Title>
+        {/* 🍔 LOGO + TITLE GROUP */}
+        <Group mb="lg">
+          <Image 
+            src="/csbites.png" 
+            h={50} 
+            w="auto" 
+            fit="contain" 
+            alt="CS Bites Logo" 
+          />
+          <Title order={2}>Choose a Store</Title>
+        </Group>
+
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
           {stores.map((store) => (
-            // ✅ FIX: Changed 'padding' to 'p' (Responsive padding)
+            // ✅ FIX: Responsive padding
             <Card key={store.id} shadow="sm" radius="md" withBorder p={{ base: 'sm', md: 'lg' }}>
               <Group justify="space-between" mb="xs">
                 <Text fw={700} size="lg">{store.name}</Text>
@@ -109,11 +121,22 @@ export default function CreateOrder({ user }: any) {
   // --- VIEW 2: MENU (Ordering from specific store) ---
   return (
     <Container size="lg">
-      <Group mb="lg">
-        <ActionIcon variant="default" size="lg" onClick={() => setSelectedStore(null)}>
-          <IconArrowLeft size={18} />
-        </ActionIcon>
-        <Title order={2}>Ordering from {selectedStore.name}</Title>
+      <Group mb="lg" justify="space-between">
+        <Group>
+            <ActionIcon variant="default" size="lg" onClick={() => setSelectedStore(null)}>
+            <IconArrowLeft size={18} />
+            </ActionIcon>
+            <Title order={2}>Ordering from {selectedStore.name}</Title>
+        </Group>
+        
+        {/* 🍔 LOGO HERE TOO (Right side) */}
+        <Image 
+            src="/csbites.png" 
+            h={40} 
+            w="auto" 
+            fit="contain" 
+            alt="CS Bites Logo" 
+        />
       </Group>
 
       {/* Pickup / Dropoff */}
@@ -132,7 +155,7 @@ export default function CreateOrder({ user }: any) {
         <Grid.Col span={{ base: 12, md: 8 }}>
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
             {selectedStore.menu.map((f: any) => (
-              // ✅ FIX: Added responsive padding here too
+              // ✅ FIX: Responsive padding
               <Card key={f.id} shadow="sm" radius="md" p="sm">
                 <Text fw={600}>{f.name}</Text>
                 <Text size="sm" c="dimmed">₱{f.price}</Text>
@@ -145,7 +168,7 @@ export default function CreateOrder({ user }: any) {
 
         {/* ORDER SUMMARY */}
         <Grid.Col span={{ base: 12, md: 4 }}>
-          {/* ✅ FIX: Added responsive padding for the receipt card */}
+          {/* ✅ FIX: Responsive padding */}
           <Card shadow="sm" radius="md" p={{ base: 'sm', md: 'lg' }}>
             <Title order={4}>Your Order</Title>
             <Divider my="sm" />

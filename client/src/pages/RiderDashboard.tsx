@@ -8,15 +8,14 @@ import {
   Divider,
   Group,
   Badge,
-  ThemeIcon,
   ActionIcon,
   Grid,
   LoadingOverlay,
-  Container
+  Container,
+  Image // 👈 Added Image import
 } from "@mantine/core";
 import { 
   IconMapPin, 
-  IconBike, 
   IconCheck, 
   IconRefresh, 
   IconBuildingStore 
@@ -86,12 +85,18 @@ export default function RiderDashboard({ user }: any) {
       <LoadingOverlay visible={loading} overlayProps={{ blur: 2 }} />
 
       <Group justify="space-between" mb="lg">
+        {/* 🍔 LOGO + TITLE GROUP */}
         <Group>
-          <ThemeIcon size="lg" variant="light" color="orange">
-             <IconBike size={20} />
-          </ThemeIcon>
+          <Image 
+            src="/csbites.png" 
+            h={40} 
+            w="auto" 
+            fit="contain" 
+            alt="CS Bites Logo" 
+          />
           <Title order={2}>Delivery Board</Title>
         </Group>
+        
         <ActionIcon variant="light" size="lg" onClick={() => loadOrders()}>
           <IconRefresh size={18} />
         </ActionIcon>
@@ -110,7 +115,7 @@ export default function RiderDashboard({ user }: any) {
           const isCompleted = order.status === "DELIVERED" || order.status === "COMPLETED";
 
           return (
-            // ✅ FIX: Changed 'padding' to 'p' (Responsive padding)
+            // ✅ FIX: Responsive padding
             <Card key={order.id} withBorder shadow="sm" radius="md" p={{ base: 'sm', md: 'lg' }}>
               {/* HEADER */}
               <Group justify="space-between" mb="sm">

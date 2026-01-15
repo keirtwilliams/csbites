@@ -8,6 +8,7 @@ import {
   Text,
   Stack,
   Divider,
+  Image // 👈 Added Image import
 } from "@mantine/core";
 
 // ✅ FIX: Define the base URL (Vercel or Localhost)
@@ -42,7 +43,18 @@ export default function Login({ onLogin, onSwitch }: any) {
       radius="md"
       p="xl"
     >
-      <Stack gap="xs">
+      {/* Added align="center" to center the Logo & Text */}
+      <Stack gap="xs" align="center">
+        {/* 🍔 LOGO HERE */}
+        <Image 
+          src="/csbites.png" 
+          h={100}           // Adjust height as needed
+          w="auto" 
+          fit="contain" 
+          alt="CS Bites Logo"
+          mb="xs"           // Add a little space below logo
+        />
+
         <Title order={2}>Welcome back</Title>
         <Text c="dimmed" size="sm">
           Sign in to continue to CS Bite
