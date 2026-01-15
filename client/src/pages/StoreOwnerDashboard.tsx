@@ -106,7 +106,7 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
           <Stack align="center" mb="lg">
             {/* 🍔 LOGO HERE for Setup Screen */}
             <Image 
-                src="/csbites.png" 
+                src="/csbitesfinal.png" 
                 h={80} 
                 w="auto" 
                 fit="contain" 

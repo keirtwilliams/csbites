@@ -47,7 +47,7 @@ export default function Login({ onLogin, onSwitch }: any) {
       <Stack gap="xs" align="center">
         {/* 🍔 LOGO HERE */}
         <Image 
-          src="/csbites.png" 
+          src="/csbitesfinal.png" 
           h={100}           // Adjust height as needed
           w="auto" 
           fit="contain" 

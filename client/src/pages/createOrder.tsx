@@ -78,7 +78,7 @@ export default function CreateOrder({ user }: any) {
         {/* 🍔 LOGO + TITLE GROUP */}
         <Group mb="lg">
           <Image 
-            src="/csbites.png" 
+            src="/csbitesfinal.png" 
             h={50} 
             w="auto" 
             fit="contain" 

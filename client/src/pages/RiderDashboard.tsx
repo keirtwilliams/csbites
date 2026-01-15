@@ -88,7 +88,7 @@ export default function RiderDashboard({ user }: any) {
         {/* 🍔 LOGO + TITLE GROUP */}
         <Group>
           <Image 
-            src="/csbites.png" 
+            src="/csbitesfinal.png" 
             h={40} 
             w="auto" 
             fit="contain" 

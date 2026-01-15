@@ -96,7 +96,7 @@ export default function OrdersTable() {
         {/* 🍔 LOGO + TITLE GROUP */}
         <Group gap="xs">
           <Image 
-            src="/csbites.png" 
+            src="/csbitesfinal.png" 
             h={35} // Smaller height for the table header
             w="auto" 
             fit="contain" 

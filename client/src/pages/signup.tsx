@@ -11,9 +11,13 @@ import {
   NumberInput,
   SegmentedControl,
   Center,
-  Box
+  Box,
+  Image // 👈 Added Image import
 } from "@mantine/core";
 import { IconUser, IconMoped, IconBuildingStore } from "@tabler/icons-react";
+
+// ✅ FIX: Define the base URL (Vercel or Localhost)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Signup({ onSignup, onSwitch }: any) {
   const [email, setEmail] = useState("");
@@ -42,7 +46,8 @@ export default function Signup({ onSignup, onSwitch }: any) {
     };
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/register`, {
+      // ✅ FIX: Use the variable
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -67,7 +72,17 @@ export default function Signup({ onSignup, onSwitch }: any) {
 
   return (
     <Card withBorder shadow="lg" radius="md" p="xl">
-      <Stack gap="xs">
+      {/* ✅ ADDED: align="center" to center the Logo & Text */}
+      <Stack gap="xs" align="center">
+        {/* 🍔 LOGO HERE */}
+        <Image 
+          src="/csbitesfinal.png" 
+          h={100}           
+          w="auto" 
+          fit="contain" 
+          alt="CS Bites Logo"
+          mb="xs" 
+        />
         <Title order={2}>Create account</Title>
         <Text c="dimmed" size="sm">
           Join CS Bite as a Customer, Rider, or Store Owner
@@ -77,7 +92,7 @@ export default function Signup({ onSignup, onSwitch }: any) {
       <Divider my="md" />
 
       <Stack>
-        {/* 🎛️ Role Selector (Admin Removed) */}
+        {/* 🎛️ Role Selector */}
         <Text size="sm" fw={500} mb={-10}>
           I am a...
         </Text>
