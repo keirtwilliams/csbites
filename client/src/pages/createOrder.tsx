@@ -77,7 +77,8 @@ export default function CreateOrder({ user }: any) {
         <Title order={2} mb="lg">Choose a Store</Title>
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
           {stores.map((store) => (
-            <Card key={store.id} shadow="sm" radius="md" withBorder padding="lg">
+            // ✅ FIX: Changed 'padding' to 'p' (Responsive padding)
+            <Card key={store.id} shadow="sm" radius="md" withBorder p={{ base: 'sm', md: 'lg' }}>
               <Group justify="space-between" mb="xs">
                 <Text fw={700} size="lg">{store.name}</Text>
                 <Badge color="green">OPEN</Badge>
@@ -131,7 +132,8 @@ export default function CreateOrder({ user }: any) {
         <Grid.Col span={{ base: 12, md: 8 }}>
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
             {selectedStore.menu.map((f: any) => (
-              <Card key={f.id} shadow="sm" radius="md">
+              // ✅ FIX: Added responsive padding here too
+              <Card key={f.id} shadow="sm" radius="md" p="sm">
                 <Text fw={600}>{f.name}</Text>
                 <Text size="sm" c="dimmed">₱{f.price}</Text>
                 <Button mt="sm" fullWidth onClick={() => addItem(f)}>Add</Button>
@@ -143,7 +145,8 @@ export default function CreateOrder({ user }: any) {
 
         {/* ORDER SUMMARY */}
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Card shadow="sm" radius="md">
+          {/* ✅ FIX: Added responsive padding for the receipt card */}
+          <Card shadow="sm" radius="md" p={{ base: 'sm', md: 'lg' }}>
             <Title order={4}>Your Order</Title>
             <Divider my="sm" />
             

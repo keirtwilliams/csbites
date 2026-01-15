@@ -110,7 +110,8 @@ export default function RiderDashboard({ user }: any) {
           const isCompleted = order.status === "DELIVERED" || order.status === "COMPLETED";
 
           return (
-            <Card key={order.id} withBorder shadow="sm" radius="md" padding="lg">
+            // ✅ FIX: Changed 'padding' to 'p' (Responsive padding)
+            <Card key={order.id} withBorder shadow="sm" radius="md" p={{ base: 'sm', md: 'lg' }}>
               {/* HEADER */}
               <Group justify="space-between" mb="sm">
                 <Badge size="lg" color={isCompleted ? "green" : "blue"}>

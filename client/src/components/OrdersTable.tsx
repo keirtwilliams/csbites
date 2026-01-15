@@ -9,7 +9,8 @@ import {
   Title,
   LoadingOverlay,
   ActionIcon,
-  Text
+  Text,
+ 
 } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 
@@ -27,9 +28,7 @@ export default function OrdersTable() {
 
   // 1. Fetch Data (Orders + Active Riders)
   async function fetchData() {
-    // Note: We don't set loading=true here to avoid flickering every 3 seconds
     try {
-      // ✅ FIX: Use the variable
       const [ordersRes, ridersRes] = await Promise.all([
         fetch(`${API_URL}/orders`),
         fetch(`${API_URL}/orders/riders`)
@@ -43,16 +42,16 @@ export default function OrdersTable() {
     }
   }
 
-  // ✅ REAL-TIME FIX: Auto-refresh every 3 seconds
+  // ✅ REAL-TIME: Auto-refresh every 3 seconds
   useEffect(() => {
-    setLoading(true); // Show spinner only on FIRST load
+    setLoading(true); 
     fetchData().finally(() => setLoading(false));
 
     const interval = setInterval(() => {
-      fetchData(); // Silent update every 3 seconds
+      fetchData(); 
     }, 3000);
 
-    return () => clearInterval(interval); // Cleanup timer on exit
+    return () => clearInterval(interval); 
   }, []);
 
   // 2. Handle Assign Action
@@ -65,7 +64,6 @@ export default function OrdersTable() {
     }
 
     try {
-      // ✅ FIX: Use the variable
       const res = await fetch(`${API_URL}/orders/${orderId}/assign`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -74,7 +72,7 @@ export default function OrdersTable() {
 
       if (res.ok) {
         alert("Rider Assigned Successfully!");
-        fetchData(); // Refresh immediately
+        fetchData(); 
       } else {
         alert("Failed to assign rider");
       }
@@ -90,78 +88,87 @@ export default function OrdersTable() {
   }));
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder mt="lg">
+    // ✅ RESPONSIVE UPDATE: Dynamic padding (small on mobile, large on desktop)
+    <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder mt="lg">
       <LoadingOverlay visible={loading} />
       
       <Group justify="space-between" mb="md">
-        <Title order={3}>Admin Dispatch Board</Title>
+        <Title order={3} size="h4">Admin Dispatch Board</Title>
         <ActionIcon variant="light" size="lg" onClick={() => fetchData()}>
           <IconRefresh size={18} />
         </ActionIcon>
       </Group>
 
-      <Table striped highlightOnHover verticalSpacing="sm">
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Date</Table.Th>
-            <Table.Th>Customer</Table.Th>
-            <Table.Th>Store</Table.Th>
-            <Table.Th>Items</Table.Th>
-            <Table.Th>Status</Table.Th>
-            <Table.Th>Assign Driver</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {orders.map((order) => (
-            <Table.Tr key={order.id}>
-              <Table.Td>{new Date(order.createdAt).toLocaleTimeString()}</Table.Td>
-              <Table.Td>
-                <Text size="sm" fw={500}>{order.customer.email}</Text>
-                <Text size="xs" c="dimmed">{order.dropoff}</Text>
-              </Table.Td>
-              <Table.Td>
-                 <Text size="sm">Store ID: {order.storeId.substring(0,6)}...</Text>
-              </Table.Td>
-              <Table.Td>
-                {order.items.map((i: any) => (
-                  <div key={i.id}>• {i.quantity}x {i.food.name}</div>
-                ))}
-              </Table.Td>
-              <Table.Td>
-                <Badge 
-                  color={
-                    order.status === "PENDING" ? "yellow" : 
-                    order.status === "ASSIGNED" ? "blue" : "green"
-                  }
-                >
-                  {order.status}
-                </Badge>
-              </Table.Td>
-              <Table.Td>
-                {order.status === "PENDING" ? (
-                  <Group gap={5}>
-                    <Select
-                      placeholder="Pick Rider"
-                      data={riderOptions}
-                      searchable
-                      value={selections[order.id] || ""}
-                      onChange={(val) => setSelections({ ...selections, [order.id]: val as string })}
-                      style={{ width: 180 }}
-                    />
-                    <Button size="xs" onClick={() => handleAssign(order.id)}>
-                      Assign
-                    </Button>
-                  </Group>
-                ) : (
-                  <Text size="sm" c="dimmed">
-                    Rider: {order.rider?.user?.email || "Assigned"}
-                  </Text>
-                )}
-              </Table.Td>
+      {/* ✅ RESPONSIVE UPDATE: Table.ScrollContainer 
+         This forces a horizontal scrollbar if the screen is smaller than 800px.
+         This prevents the "Assign" button from getting squished.
+      */}
+      <Table.ScrollContainer minWidth={800}>
+        <Table striped highlightOnHover verticalSpacing="sm">
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Date</Table.Th>
+              <Table.Th>Customer</Table.Th>
+              <Table.Th>Store</Table.Th>
+              <Table.Th>Items</Table.Th>
+              <Table.Th>Status</Table.Th>
+              <Table.Th>Assign Driver</Table.Th>
             </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
+          </Table.Thead>
+          <Table.Tbody>
+            {orders.map((order) => (
+              <Table.Tr key={order.id}>
+                <Table.Td>{new Date(order.createdAt).toLocaleTimeString()}</Table.Td>
+                <Table.Td>
+                  <Text size="sm" fw={500}>{order.customer.email}</Text>
+                  <Text size="xs" c="dimmed" truncate="end" w={150}>
+                    {order.dropoff}
+                  </Text>
+                </Table.Td>
+                <Table.Td>
+                   <Text size="sm">Store ID: {order.storeId.substring(0,6)}...</Text>
+                </Table.Td>
+                <Table.Td>
+                  {order.items.map((i: any) => (
+                    <div key={i.id}>• {i.quantity}x {i.food.name}</div>
+                  ))}
+                </Table.Td>
+                <Table.Td>
+                  <Badge 
+                    color={
+                      order.status === "PENDING" ? "yellow" : 
+                      order.status === "ASSIGNED" ? "blue" : "green"
+                    }
+                  >
+                    {order.status}
+                  </Badge>
+                </Table.Td>
+                <Table.Td>
+                  {order.status === "PENDING" ? (
+                    <Group gap={5} wrap="nowrap"> {/* wrap="nowrap" keeps button next to select */}
+                      <Select
+                        placeholder="Pick Rider"
+                        data={riderOptions}
+                        searchable
+                        value={selections[order.id] || ""}
+                        onChange={(val) => setSelections({ ...selections, [order.id]: val as string })}
+                        style={{ width: 160 }} 
+                      />
+                      <Button size="xs" onClick={() => handleAssign(order.id)}>
+                        Assign
+                      </Button>
+                    </Group>
+                  ) : (
+                    <Text size="sm" c="dimmed">
+                      Rider: {order.rider?.user?.email || "Assigned"}
+                    </Text>
+                  )}
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </Table.ScrollContainer>
       
       {orders.length === 0 && (
         <Text c="dimmed" ta="center" py="xl">No orders found.</Text>

@@ -151,11 +151,14 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
         {/* Stats Column */}
         <Grid.Col span={{ base: 12, md: 4 }}>
           <Stack>
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
+            {/* ✅ FIX: Changed 'padding' to 'p' (Responsive padding) */}
+            <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder>
               <Text size="xs" tt="uppercase" fw={700} c="dimmed">Active Orders</Text>
               <Title order={2} mt="xs">0</Title> 
             </Card>
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
+            
+            {/* ✅ FIX: Changed 'padding' to 'p' */}
+            <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder>
               <Text size="xs" tt="uppercase" fw={700} c="dimmed">Total Revenue</Text>
               <Title order={2} mt="xs">₱ 0.00</Title> 
             </Card>
@@ -164,7 +167,8 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
 
         {/* Menu Column */}
         <Grid.Col span={{ base: 12, md: 8 }}>
-          <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+          {/* ✅ FIX: Changed 'padding' to 'p' */}
+          <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder h="100%">
             <Group justify="space-between" mb="md">
               <Title order={3}>Menu Items</Title>
               <Button leftSection={<IconPlus size={14} />} onClick={open}>
