@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:3000";
+// ✅ FIX: Use Vercel's link if live, otherwise use Localhost
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 // ✅ EXISTING: Get One Store (for Owners)
 export async function fetchStoreByOwner(ownerId: string) {
