@@ -13,30 +13,31 @@ import {
   Badge,
   ActionIcon,
   Container,
-  Image // 👈 Added Image import
+  Image
 } from "@mantine/core";
-import { IconArrowLeft, IconBuildingStore, IconMapPin } from "@tabler/icons-react";
+import { 
+  IconArrowLeft, 
+  IconBuildingStore, 
+  IconMapPin, 
+  IconMinus, // 👈 Added
+  IconPlus   // 👈 Added
+} from "@tabler/icons-react";
 import { fetchAllStores } from "../api/store";
 
-// ✅ FIX: Define the base URL (Vercel or Localhost)
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function CreateOrder({ user }: any) {
-  // 🏪 STATE: Stores & Navigation
   const [stores, setStores] = useState<any[]>([]);
   const [selectedStore, setSelectedStore] = useState<any | null>(null);
-
-  // 🍔 STATE: Ordering
   const [items, setItems] = useState<any[]>([]);
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
 
-  // 1. Fetch Stores on Load
   useEffect(() => {
     fetchAllStores().then(setStores).catch(console.error);
   }, []);
 
-  // 2. Add Item Logic
+  // 1. ✅ Modified Add Logic
   function addItem(foodItem: any) {
     const existing = items.find((i) => i.foodId === foodItem.id);
     if (existing) {
@@ -46,20 +47,29 @@ export default function CreateOrder({ user }: any) {
     }
   }
 
+  // 2. ✅ NEW: Decrease/Remove Item Logic
+  function removeItem(foodId: string) {
+    setItems((prevItems) => 
+      prevItems
+        .map((item) => 
+          item.foodId === foodId ? { ...item, quantity: item.quantity - 1 } : item
+        )
+        .filter((item) => item.quantity > 0) // 👈 Automatically removes item if quantity hits 0
+    );
+  }
+
   function calculateTotal() {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }
 
   async function submitOrder() {
     if (!selectedStore) return;
-
-    // ✅ FIX: Use the variable with backticks `
     await fetch(`${API_URL}/orders`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         customerId: user.id,
-        storeId: selectedStore.id, // 👈 CRITICAL: We now know which store!
+        storeId: selectedStore.id,
         pickup,
         dropoff,
         items: items.map(({ foodId, quantity }) => ({ foodId, quantity })),
@@ -68,39 +78,27 @@ export default function CreateOrder({ user }: any) {
 
     alert("Order placed successfully!");
     setItems([]);
-    setSelectedStore(null); // Go back to store list
+    setSelectedStore(null);
   }
 
-  // --- VIEW 1: STORE LIST ---
   if (!selectedStore) {
     return (
       <Container>
-        {/* 🍔 LOGO + TITLE GROUP */}
         <Group mb="lg">
-          <Image 
-            src="/csbitesfinal.png" 
-            h={50} 
-            w="auto" 
-            fit="contain" 
-            alt="CS Bites Logo" 
-          />
+          <Image src="/csbitesfinal.png" h={50} w="auto" fit="contain" alt="CS Bites Logo" />
           <Title order={2}>Choose a Store</Title>
         </Group>
-
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
           {stores.map((store) => (
-            // ✅ FIX: Responsive padding
             <Card key={store.id} shadow="sm" radius="md" withBorder p={{ base: 'sm', md: 'lg' }}>
               <Group justify="space-between" mb="xs">
                 <Text fw={700} size="lg">{store.name}</Text>
                 <Badge color="green">OPEN</Badge>
               </Group>
-
               <Group gap="xs" c="dimmed" mb="md">
                 <IconMapPin size={16} />
                 <Text size="sm">{store.address}</Text>
               </Group>
-
               <Button 
                 fullWidth 
                 variant="light" 
@@ -112,34 +110,22 @@ export default function CreateOrder({ user }: any) {
             </Card>
           ))}
         </SimpleGrid>
-        
-        {stores.length === 0 && <Text c="dimmed" ta="center" mt="xl">No stores available right now.</Text>}
       </Container>
     );
   }
 
-  // --- VIEW 2: MENU (Ordering from specific store) ---
   return (
     <Container size="lg">
       <Group mb="lg" justify="space-between">
         <Group>
             <ActionIcon variant="default" size="lg" onClick={() => setSelectedStore(null)}>
-            <IconArrowLeft size={18} />
+                <IconArrowLeft size={18} />
             </ActionIcon>
             <Title order={2}>Ordering from {selectedStore.name}</Title>
         </Group>
-        
-        {/* 🍔 LOGO HERE TOO (Right side) */}
-        <Image 
-            src="/csbites.png" 
-            h={40} 
-            w="auto" 
-            fit="contain" 
-            alt="CS Bites Logo" 
-        />
+        <Image src="/csbites.png" h={40} w="auto" fit="contain" alt="CS Bites Logo" />
       </Group>
 
-      {/* Pickup / Dropoff */}
       <Grid mb="lg">
         <Grid.Col span={{ base: 12, md: 6 }}>
           <TextInput label="Pickup location" value={pickup} onChange={(e) => setPickup(e.target.value)} />
@@ -149,26 +135,20 @@ export default function CreateOrder({ user }: any) {
         </Grid.Col>
       </Grid>
 
-      {/* Main Content */}
       <Grid align="flex-start">
-        {/* FOOD LIST */}
         <Grid.Col span={{ base: 12, md: 8 }}>
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
             {selectedStore.menu.map((f: any) => (
-              // ✅ FIX: Responsive padding
               <Card key={f.id} shadow="sm" radius="md" p="sm">
                 <Text fw={600}>{f.name}</Text>
                 <Text size="sm" c="dimmed">₱{f.price}</Text>
                 <Button mt="sm" fullWidth onClick={() => addItem(f)}>Add</Button>
               </Card>
             ))}
-             {selectedStore.menu.length === 0 && <Text c="dimmed">This store has no items yet.</Text>}
           </SimpleGrid>
         </Grid.Col>
 
-        {/* ORDER SUMMARY */}
         <Grid.Col span={{ base: 12, md: 4 }}>
-          {/* ✅ FIX: Responsive padding */}
           <Card shadow="sm" radius="md" p={{ base: 'sm', md: 'lg' }}>
             <Title order={4}>Your Order</Title>
             <Divider my="sm" />
@@ -178,9 +158,34 @@ export default function CreateOrder({ user }: any) {
             ) : (
               <Stack gap="xs">
                 {items.map((item) => (
-                  <Group key={item.foodId} justify="space-between">
-                    <Text size="sm">{item.name} × {item.quantity}</Text>
-                    <Text size="sm">₱{item.price * item.quantity}</Text>
+                  <Group key={item.foodId} justify="space-between" wrap="nowrap">
+                    <Box style={{ flex: 1 }}>
+                        <Text size="sm" truncate>{item.name}</Text>
+                        <Text size="xs" c="dimmed">₱{item.price} each</Text>
+                    </Box>
+                    
+                    {/* ✅ New Quantity Controls */}
+                    <Group gap={5}>
+                        <ActionIcon 
+                            size="sm" 
+                            variant="light" 
+                            color="red" 
+                            onClick={() => removeItem(item.foodId)}
+                        >
+                            <IconMinus size={12} />
+                        </ActionIcon>
+                        
+                        <Text size="sm" fw={700} w={20} ta="center">{item.quantity}</Text>
+                        
+                        <ActionIcon 
+                            size="sm" 
+                            variant="light" 
+                            color="blue" 
+                            onClick={() => addItem({ id: item.foodId, name: item.name, price: item.price })}
+                        >
+                            <IconPlus size={12} />
+                        </ActionIcon>
+                    </Group>
                   </Group>
                 ))}
               </Stack>
