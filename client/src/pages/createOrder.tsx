@@ -12,6 +12,7 @@ import {
   Grid,
   Badge,
   ActionIcon,
+  Box,
   Container,
   Image
 } from "@mantine/core";
