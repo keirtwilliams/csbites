@@ -5,10 +5,9 @@ import {
   Image 
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconPencil } from '@tabler/icons-react'; // 👈 Added IconPencil
 import { fetchStoreByOwner, createStore, addFoodItem } from '../api/store'; 
 
-// ✅ Define API URL
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 interface FoodItem {
@@ -27,14 +26,16 @@ interface Store {
 
 export default function StoreOwnerDashboard({ currentUser }: { currentUser: any }) {
   const [store, setStore] = useState<Store | null>(null);
-  const [orders, setOrders] = useState<any[]>([]); // 👈 Added state for orders
+  const [orders, setOrders] = useState<any[]>([]); 
   const [loading, setLoading] = useState(true);
   
   const [opened, { open, close }] = useDisclosure(false);
-  const [newItem, setNewItem] = useState({ name: '', price: 0 });
+  
+  // 📝 Form states
+  const [newItem, setNewItem] = useState({ id: '', name: '', price: 0 });
+  const [isEditing, setIsEditing] = useState(false); // 👈 Track if we are editing or adding
   const [storeForm, setStoreForm] = useState({ name: '', address: '' });
 
-  // 1. ✅ UPDATED DATA FETCHING
   async function loadDashboardData() {
     if (!currentUser?.id) return;
     try {
@@ -42,11 +43,9 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
       setStore(storeData); 
 
       if (storeData) {
-        // Fetch orders specifically for this store from the backend
         const ordersRes = await fetch(`${API_URL}/orders`);
         if (ordersRes.ok) {
           const allOrders = await ordersRes.json();
-          // Filter orders that belong to this store owner's store
           const storeOrders = allOrders.filter((o: any) => o.storeId === storeData.id);
           setOrders(storeOrders);
         }
@@ -59,21 +58,72 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
   useEffect(() => {
     setLoading(true);
     loadDashboardData().finally(() => setLoading(false));
-
-    const interval = setInterval(() => {
-      loadDashboardData(); 
-    }, 3000);
-
+    const interval = setInterval(() => { loadDashboardData(); }, 3000);
     return () => clearInterval(interval);
   }, [currentUser]);
 
-  // 2. ✅ CALCULATE STATS
-  // Active = Anything not delivered or completed
-  const activeOrdersCount = orders.filter(o => 
-    o.status !== "DELIVERED" && o.status !== "COMPLETED"
-  ).length;
+  // 1. ✅ DELETE ITEM FUNCTION
+  const handleDeleteItem = async (foodId: string) => {
+    if (!confirm("Are you sure you want to delete this item?")) return;
+    try {
+      const res = await fetch(`${API_URL}/stores/items/${foodId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setStore(prev => prev ? ({ ...prev, menu: prev.menu.filter(i => i.id !== foodId) }) : null);
+      } else {
+        alert("Failed to delete item");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
 
-  // Revenue = Sum of all items in COMPLETED orders
+  // 2. ✅ OPEN EDIT MODAL
+  const openEditModal = (item: FoodItem) => {
+    setNewItem({ id: item.id, name: item.name, price: item.price });
+    setIsEditing(true);
+    open();
+  };
+
+  // 3. ✅ SAVE (ADD or UPDATE) ITEM
+  const handleSaveItem = async () => {
+    if (!store) return;
+    try {
+      if (isEditing) {
+        // UPDATE LOGIC
+        const res = await fetch(`${API_URL}/stores/items/${newItem.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: newItem.name, price: newItem.price }),
+        });
+        if (res.ok) {
+          const updated = await res.json();
+          setStore(prev => prev ? ({
+            ...prev,
+            menu: prev.menu.map(i => i.id === updated.id ? updated : i)
+          }) : null);
+        }
+      } else {
+        // ADD LOGIC
+        const addedItem = await addFoodItem({
+          storeId: store.id,
+          name: newItem.name,
+          price: newItem.price
+        });
+        setStore(prev => prev ? ({ ...prev, menu: [...prev.menu, addedItem] }) : null);
+      }
+      
+      setNewItem({ id: '', name: '', price: 0 }); 
+      setIsEditing(false);
+      close();
+    } catch (error) {
+      alert("Failed to save item.");
+    }
+  };
+
+  // Stats calculation
+  const activeOrdersCount = orders.filter(o => o.status !== "DELIVERED" && o.status !== "COMPLETED").length;
   const totalRevenue = orders
     .filter(o => o.status === "DELIVERED" || o.status === "COMPLETED")
     .reduce((sum, o) => {
@@ -83,30 +133,10 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
 
   const handleCreateStore = async () => {
     try {
-      const newStore = await createStore({
-        ownerId: currentUser.id,
-        name: storeForm.name,
-        address: storeForm.address
-      });
+      const newStore = await createStore({ ownerId: currentUser.id, name: storeForm.name, address: storeForm.address });
       setStore({ ...newStore, menu: [] });
     } catch (error) {
       alert("Failed to create store.");
-    }
-  };
-
-  const handleAddItem = async () => {
-    if (!store) return;
-    try {
-      const addedItem = await addFoodItem({
-        storeId: store.id,
-        name: newItem.name,
-        price: newItem.price
-      });
-      setStore(prev => prev ? ({ ...prev, menu: [...prev.menu, addedItem] }) : null);
-      setNewItem({ name: '', price: 0 }); 
-      close();
-    } catch (error) {
-      alert("Failed to add item.");
     }
   };
 
@@ -151,12 +181,10 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
           <Stack>
             <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder>
               <Text size="xs" tt="uppercase" fw={700} c="dimmed">Active Orders</Text>
-              {/* ✅ DYNAMIC VALUE */}
               <Title order={2} mt="xs" c="blue">{activeOrdersCount}</Title> 
             </Card>
             <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder>
               <Text size="xs" tt="uppercase" fw={700} c="dimmed">Total Revenue</Text>
-              {/* ✅ DYNAMIC VALUE */}
               <Title order={2} mt="xs" c="green">₱ {totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2})}</Title> 
             </Card>
           </Stack>
@@ -166,7 +194,9 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
           <Card shadow="sm" p={{ base: 'sm', md: 'lg' }} radius="md" withBorder h="100%">
             <Group justify="space-between" mb="md">
               <Title order={3}>Menu Items</Title>
-              <Button leftSection={<IconPlus size={14} />} onClick={open}>Add Item</Button>
+              <Button leftSection={<IconPlus size={14} />} onClick={() => { setIsEditing(false); setNewItem({id: '', name: '', price: 0}); open(); }}>
+                Add Item
+              </Button>
             </Group>
             <Stack>
               {store.menu.map((item) => (
@@ -176,7 +206,16 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
                       <Text fw={500}>{item.name}</Text>
                       <Text c="dimmed" size="sm">₱ {item.price.toFixed(2)}</Text>
                     </div>
-                    <ActionIcon color="red" variant="subtle"><IconTrash size={16} /></ActionIcon>
+                    <Group gap="xs">
+                      {/* EDIT BUTTON */}
+                      <ActionIcon color="blue" variant="subtle" onClick={() => openEditModal(item)}>
+                        <IconPencil size={16} />
+                      </ActionIcon>
+                      {/* DELETE BUTTON */}
+                      <ActionIcon color="red" variant="subtle" onClick={() => handleDeleteItem(item.id)}>
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
                   </Group>
                 </Paper>
               ))}
@@ -186,13 +225,13 @@ export default function StoreOwnerDashboard({ currentUser }: { currentUser: any 
         </Grid.Col>
       </Grid>
 
-      <Modal opened={opened} onClose={close} title="Add New Menu Item" centered>
+      <Modal opened={opened} onClose={close} title={isEditing ? "Edit Menu Item" : "Add New Menu Item"} centered>
         <Stack>
           <TextInput label="Item Name" placeholder="e.g. Halo-Halo" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.currentTarget.value })} />
           <NumberInput label="Price (₱)" min={0} value={newItem.price} onChange={(val) => setNewItem({ ...newItem, price: Number(val) })} />
           <Group justify="flex-end" mt="md">
             <Button variant="default" onClick={close}>Cancel</Button>
-            <Button onClick={handleAddItem}>Add Item</Button>
+            <Button onClick={handleSaveItem}>{isEditing ? "Save Changes" : "Add Item"}</Button>
           </Group>
         </Stack>
       </Modal>
