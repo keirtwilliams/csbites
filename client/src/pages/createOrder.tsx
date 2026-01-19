@@ -12,7 +12,7 @@ import {
   Grid,
   Badge,
   ActionIcon,
-  Box,
+  Box, // ✅ Fixed: Box is now correctly imported
   Container,
   Image
 } from "@mantine/core";
@@ -20,42 +20,66 @@ import {
   IconArrowLeft, 
   IconBuildingStore, 
   IconMapPin, 
-  IconMinus, // 👈 Added
-  IconPlus   // 👈 Added
+  IconMinus, 
+  IconPlus   
 } from "@tabler/icons-react";
 import { fetchAllStores } from "../api/store";
 
+// ✅ Define the base URL
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function CreateOrder({ user }: any) {
+  // 🏪 STATE: Stores & Navigation
   const [stores, setStores] = useState<any[]>([]);
   const [selectedStore, setSelectedStore] = useState<any | null>(null);
+
+  // 🍔 STATE: Ordering
   const [items, setItems] = useState<any[]>([]);
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
 
+  // 1. ✅ REAL-TIME POLLING: Fetch Stores every 5 seconds
   useEffect(() => {
+    // Initial load
     fetchAllStores().then(setStores).catch(console.error);
-  }, []);
 
-  // 1. ✅ Modified Add Logic
+    const interval = setInterval(() => {
+      // Only poll for new stores if the user hasn't selected one yet
+      if (!selectedStore) {
+        fetchAllStores().then(setStores).catch(console.error);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [selectedStore]);
+
+  // 2. ✅ ADD ITEM LOGIC
   function addItem(foodItem: any) {
-    const existing = items.find((i) => i.foodId === foodItem.id);
+    const foodId = foodItem.id || foodItem.foodId;
+    const existing = items.find((i) => i.foodId === foodId);
+    
     if (existing) {
-      setItems(items.map((i) => i.foodId === foodItem.id ? { ...i, quantity: i.quantity + 1 } : i));
+      setItems(items.map((i) => 
+        i.foodId === foodId ? { ...i, quantity: i.quantity + 1 } : i
+      ));
     } else {
-      setItems([...items, { foodId: foodItem.id, name: foodItem.name, price: foodItem.price, quantity: 1 }]);
+      setItems([...items, { 
+        foodId: foodId, 
+        name: foodItem.name, 
+        price: foodItem.price, 
+        quantity: 1 
+      }]);
     }
   }
 
-  // 2. ✅ NEW: Decrease/Remove Item Logic
+  // 3. ✅ REMOVE/DECREASE ITEM LOGIC
   function removeItem(foodId: string) {
     setItems((prevItems) => 
       prevItems
         .map((item) => 
           item.foodId === foodId ? { ...item, quantity: item.quantity - 1 } : item
         )
-        .filter((item) => item.quantity > 0) // 👈 Automatically removes item if quantity hits 0
+        .filter((item) => item.quantity > 0) // Automatically removes item if quantity hits 0
     );
   }
 
@@ -65,23 +89,30 @@ export default function CreateOrder({ user }: any) {
 
   async function submitOrder() {
     if (!selectedStore) return;
-    await fetch(`${API_URL}/orders`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        customerId: user.id,
-        storeId: selectedStore.id,
-        pickup,
-        dropoff,
-        items: items.map(({ foodId, quantity }) => ({ foodId, quantity })),
-      }),
-    });
+    try {
+      const res = await fetch(`${API_URL}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerId: user.id,
+          storeId: selectedStore.id,
+          pickup,
+          dropoff,
+          items: items.map(({ foodId, quantity }) => ({ foodId, quantity })),
+        }),
+      });
 
-    alert("Order placed successfully!");
-    setItems([]);
-    setSelectedStore(null);
+      if (res.ok) {
+        alert("Order placed successfully!");
+        setItems([]);
+        setSelectedStore(null);
+      }
+    } catch (error) {
+      alert("Failed to place order. Check your connection.");
+    }
   }
 
+  // --- VIEW 1: STORE LIST ---
   if (!selectedStore) {
     return (
       <Container>
@@ -111,10 +142,12 @@ export default function CreateOrder({ user }: any) {
             </Card>
           ))}
         </SimpleGrid>
+        {stores.length === 0 && <Text c="dimmed" ta="center" mt="xl">No stores available right now.</Text>}
       </Container>
     );
   }
 
+  // --- VIEW 2: MENU (Ordering) ---
   return (
     <Container size="lg">
       <Group mb="lg" justify="space-between">
@@ -165,7 +198,6 @@ export default function CreateOrder({ user }: any) {
                         <Text size="xs" c="dimmed">₱{item.price} each</Text>
                     </Box>
                     
-                    {/* ✅ New Quantity Controls */}
                     <Group gap={5}>
                         <ActionIcon 
                             size="sm" 
@@ -182,7 +214,7 @@ export default function CreateOrder({ user }: any) {
                             size="sm" 
                             variant="light" 
                             color="blue" 
-                            onClick={() => addItem({ id: item.foodId, name: item.name, price: item.price })}
+                            onClick={() => addItem(item)}
                         >
                             <IconPlus size={12} />
                         </ActionIcon>
